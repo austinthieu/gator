@@ -23,7 +23,10 @@ func main() {
 	}
 
 	db, err := sql.Open("postgres", cfg.DbURL)
-
+	if err != nil {
+		log.Fatalf("error connected to db: %v", err)
+	}
+	defer db.Close()
 	dbQueries := database.New(db)
 
 	programState := state{
@@ -37,8 +40,10 @@ func main() {
 
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerListUsers)
 
-	if len(os.Args) < 3 {
+	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
 	}
 
