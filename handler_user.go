@@ -44,7 +44,7 @@ func handlerLogin(s *state, cmd command) error {
 	username := cmd.args[0]
 	_, err := s.db.GetUser(context.Background(), username)
 	if err != nil {
-		return fmt.Errorf("Username does not exist: %s", username)
+		return fmt.Errorf("username does not exist: %s", username)
 	}
 
 	err = s.cfg.SetUser(username)
