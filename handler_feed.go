@@ -58,7 +58,20 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("couldn't create feed: %w", err)
 	}
 
+	// Add to feed_follows table
+	feedFollow, err := s.db.CreateFeedFollows(context.Background(), database.CreateFeedFollowsParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		return err
+	}
+
 	fmt.Println("Feed created successfully:")
+	fmt.Printf("Added feed to following list: %v", feedFollow.ID)
 	printFeed(feed, user)
 	fmt.Println()
 	fmt.Println("=====================================")
