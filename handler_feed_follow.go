@@ -9,34 +9,32 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <url>", cmd.name)
 	}
 
 	url := cmd.args[0]
 
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
-
 	feed, err := s.db.GetFeedFromURL(context.Background(), url)
 	if err != nil {
 		return err
 	}
 
-	feed_follow, err := s.db.CreateFeedFollows(context.Background(), database.CreateFeedFollowsParams{
+	feedFollow, err := s.db.CreateFeedFollows(context.Background(), database.CreateFeedFollowsParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		UserID:    user.ID,
 		FeedID:    feed.ID,
 	})
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Feed Follow successfully created!")
 
-	printFeedFollows(feed_follow, user, feed)
+	printFeedFollows(feedFollow, user, feed)
 
 	return nil
 }
@@ -50,12 +48,7 @@ func printFeedFollows(ff database.CreateFeedFollowsRow, user database.User, feed
 	fmt.Println("==================================================")
 }
 
-func handlerFollowing(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
-
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
